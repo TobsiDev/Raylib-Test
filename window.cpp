@@ -1,4 +1,5 @@
 #include "window.h"
+#include "pipes.h"
 void makeWindow(){
     
     InitWindow(1280, 720, "Tobsi's Raylib Project");
@@ -32,6 +33,20 @@ void makeWindow(){
     Rectangle playerHitbox = {playerPosition.x, playerPosition.y, playerTWidth, playerTHeight};
     bool playerAnimActive = false;
 
+    pipes pipe1(1, "Commander");
+    pipes pipe2(2, "Chad");
+    pipes pipe3(3, "Jimbo");
+//    pipe1.ID = 1;
+//    pipe1.str = "Commander";
+/*
+    pipes pipe2();
+    pipe1.ID = 2;
+    pipe1.str = "Chad";
+
+    pipes pipe3();
+    pipe1.ID = 3;
+    pipe1.str = "Jimbo";
+*/
     while (!WindowShouldClose())
     {
         BeginDrawing();
@@ -77,7 +92,9 @@ void makeWindow(){
         DrawRectangleRec(platform, GRAY);
         //CheckCollisionRecs() // https://github.com/raysan5/raylib/blob/master/examples/core/core_2d_camera_platformer.c 
 
-
+        pipe1.pipesInit();
+        pipe2.pipesInit();
+        pipe3.pipesInit();
 
         DrawFPS(10, 10);
         EndDrawing();
@@ -85,6 +102,10 @@ void makeWindow(){
 
     UnloadTexture(playerTextu);
     CloseWindow(); 
+
+    pipe1.~pipes();
+    pipe2.~pipes();
+    pipe3.~pipes();
     
 }
 
