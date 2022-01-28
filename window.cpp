@@ -1,5 +1,4 @@
 #include "window.h"
-#include "pipes.h"
 void makeWindow(){
     
     InitWindow(1280, 720, "Tobsi's Raylib Project");
@@ -14,11 +13,13 @@ void makeWindow(){
     SetWindowIcon(icon);
     
     // Player texture 
-    //Image playerText = LoadImage("./res/img/player/Test_anim-0002.png");
-    //Texture2D playerTextu = LoadTextureFromImage(playerText); // Frames = 4x4 (4 frames on each axis)
+    Instance player("./res/img/player/SussyFlap-0001.png", 1, 16, 16, 16);
+    Instance testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
 
+/*
     Image playerText = LoadImage("./res/img/player/SussyFlap-0001.png");
     Texture2D playerTextu = LoadTextureFromImage(playerText); // Frames = 4x4 (4 frames on each axis)
+
 
     int playerAnimPrLine = 1;   // Animation frames pr line     (from 0 and up. 0 is included)
     int playerAnimLines = 5;    // Animation lines              (from 0 and up. 0 is included)
@@ -31,22 +32,8 @@ void makeWindow(){
     Vector2 playerPosition = {0.0f, 0.0f};
     Rectangle playerFrameRect = {0, 0, playerTWidth, playerTWidth};
     Rectangle playerHitbox = {playerPosition.x, playerPosition.y, playerTWidth, playerTHeight};
-    bool playerAnimActive = false;
+    bool playerAnimActive = false;*/
 
-    pipes pipe1(1, "Commander");
-    pipes pipe2(2, "Chad");
-    pipes pipe3(3, "Jimbo");
-//    pipe1.ID = 1;
-//    pipe1.str = "Commander";
-/*
-    pipes pipe2();
-    pipe1.ID = 2;
-    pipe1.str = "Chad";
-
-    pipes pipe3();
-    pipe1.ID = 3;
-    pipe1.str = "Jimbo";
-*/
     while (!WindowShouldClose())
     {
         BeginDrawing();
@@ -60,13 +47,28 @@ void makeWindow(){
         }
         
 
-        if (IsKeyDown(KEY_LEFT)){playerPosition.x -= playerSpeed;}
-        if (IsKeyDown(KEY_RIGHT)){playerPosition.x += playerSpeed;}
-        if (IsKeyDown(KEY_UP)){playerPosition.y -= playerSpeed;}
-        if (IsKeyDown(KEY_DOWN)){playerPosition.y += playerSpeed;}
-        playerHitbox.x = playerPosition.x;
-        playerHitbox.y = playerPosition.y;
+        if (IsKeyDown(KEY_LEFT)){player.position.x -= playerSpeed;}
+        if (IsKeyDown(KEY_RIGHT)){player.position.x += playerSpeed;}
+        if (IsKeyDown(KEY_UP)){player.position.y -= playerSpeed;}
+        if (IsKeyDown(KEY_DOWN)){player.position.y += playerSpeed;}
+        player.hitbox.x = player.position.x;
+        player.hitbox.y = player.position.y;
 
+        if(IsKeyDown(KEY_KP_1)){
+            DrawText("Key 1 is down", 10, 70, 28, PURPLE);
+            testAnim.isAnimActive = true;
+            playAnimLineRe(testAnim, 0, 16);
+            //playAnimLine(testAnim.frameCounter, testAnim.currentFrame, 0, 16, testAnim.isAnimActive, testAnim.frameRect, testAnim.width, testAnim.height);
+        }
+        else if (IsKeyDown(KEY_KP_2)){
+            DrawText("Key 2 is down", 10, 70, 28, PURPLE);
+            testAnim.isAnimActive = true;
+            playAnimLineRe(testAnim, 1, 16);
+            //playAnimLine(testAnim.frameCounter, testAnim.currentFrame, 1, 16, testAnim.isAnimActive, testAnim.frameRect, testAnim.width, testAnim.height);
+        }
+        else if (testAnim.isAnimActive == false && (testAnim.frameCounter != 0 || testAnim.currentFrame != 0)){testAnim.frameCounter = 0; testAnim.currentFrame = 0;/*testAnim.frameRect.x = 0; testAnim.frameRect.y = 0;*/}
+        else {DrawText("None of the TestKeys are down", 10, 70, 28, PURPLE); testAnim.isAnimActive = false; testAnim.frameRect.x = 0; testAnim.frameRect.y = 0;}
+        
         //std::cout << "Vector (x;y): " << "(" << playerPosition.x << "; " << playerPosition.y << ")" << std::endl;
         
 
@@ -76,49 +78,47 @@ void makeWindow(){
         //Rectangle rec1 = {0, 0, 32, 32};
         Rectangle platform = {20, 520, 420, 6};
 
-        if (CheckCollisionRecs(playerHitbox, platform))
+        if (CheckCollisionRecs(player.hitbox, platform))
         {
             DrawText("PLAYER IS TOUCHING THE BOX", 10, 130, 28, RED);
-            playerAnimActive = true;
-            playAnim(playerFrameCounter, playerCurrentFrame, playerCurrentLine, playerAnimPrLine, playerAnimLines, playerAnimActive, playerFrameRect, playerTWidth, playerTHeight);
+            player.isAnimActive = true;
+            playAnim(player.frameCounter, player.currentFrame, player.currentLine, player.animFramesPrLine, player.animFrameLines, player.isAnimActive, player.frameRect, player.width, player.height);
         }
         else{
             DrawText("PLAYER IS NOT TOUCHING THE BOX", 10, 130, 28, GREEN);
-            playerAnimActive = false;
+            player.isAnimActive = false;
         }
         
         
-        DrawTextureRec(playerTextu, playerFrameRect, playerPosition, WHITE); 
+        DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
+        DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
         DrawRectangleRec(platform, GRAY);
         //CheckCollisionRecs() // https://github.com/raysan5/raylib/blob/master/examples/core/core_2d_camera_platformer.c 
 
-        pipe1.pipesInit();
-        pipe2.pipesInit();
-        pipe3.pipesInit();
+        //player.debugLog();
 
         DrawFPS(10, 10);
         EndDrawing();
     }
 
-    UnloadTexture(playerTextu);
-    CloseWindow(); 
-
-    pipe1.~pipes();
-    pipe2.~pipes();
-    pipe3.~pipes();
-    
+    //UnloadTexture(playerTextu);
+    player.~Instance();
+    testAnim.~Instance();
+    CloseWindow();     
 }
 
 // Todo. 
-    // Make the same function, but you can only go down one line. Eksample: AnimLine(playerObject, GoDownFromX){}
+    // Make the same function, but you can only go down one line. Example: AnimLine(playerObject, GoDownFromX){}
     // Make a struct or a class to have all the information about an entity. 
 void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animPrLine, int& animLines, bool& active, Rectangle& frameRec, float& textureWidth, float& textureHeight){
-    /*std::cout << "Bool: " << active << std::endl;
+    //animLines--;
+    //animPrLine--;
+    std::cout << "Bool: " << active << std::endl;
     std::cout << "animLines: " << animLines << std::endl;
     std::cout << "animPrLine: " << animPrLine << std::endl;
     std::cout << "currentLine: " << currentLine << std::endl;
     std::cout << "currentFrame: " << currentFrame << std::endl;
-    std::cout << "frameCounter: " << frameCounter << std::endl;*/
+    std::cout << "frameCounter: " << frameCounter << std::endl;
     if (active)
     {
         frameCounter++;
@@ -141,14 +141,48 @@ void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animP
     frameRec.y = currentLine*textureHeight; 
 }
 
-/*void pixels(Vector2 pos, Color col, int width, int height){
-    for (size_t h = 0; h <= height; h++)
+/*void playAnimLine(int& frameCounter, int& currentFrame, int lineNumb, int animFramesPrLine, bool& active, Rectangle& frameRec, float& textureWidth, float& textureHeight){
+    std::cout << "Bool: " << active << std::endl;
+    std::cout << "lineNumb: " << lineNumb << std::endl;
+    std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
+    std::cout << "currentFrame: " << currentFrame << std::endl;
+    std::cout << "frameCounter: " << frameCounter << std::endl;
+    if (active)
     {
-        for (size_t w = 0; w <= width; w++)
+        frameCounter++;
+        if (frameCounter > 4)
         {
-            DrawPixelV((Vector2){pos.x+w, pos.y+h}, col);
+            currentFrame++;
+            if (currentFrame > animFramesPrLine)
+            {
+                currentFrame = 0;
+            }
+            frameCounter = 0;
         }
-        
     }
-    
+    frameRec.x = lineNumb*textureWidth;
+    frameRec.y = currentFrame*textureHeight; 
 }*/
+
+void playAnimLineRe(Instance& inst, int lineNumb, int animFramesPrLine){
+    std::cout << "Bool: " << inst.isAnimActive << std::endl;
+    std::cout << "lineNumb: " << lineNumb << std::endl;
+    std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
+    std::cout << "currentFrame: " << inst.currentFrame << std::endl;
+    std::cout << "frameCounter: " << inst.frameCounter << std::endl;
+    if (inst.isAnimActive)
+    {
+        inst.frameCounter++;
+        if (inst.frameCounter > 4)
+        {
+            inst.currentFrame++;
+            if (inst.currentFrame > animFramesPrLine)
+            {
+                inst.currentFrame = 0;
+            }
+            inst.frameCounter = 0;
+        }
+    }
+    inst.frameRect.x = lineNumb*inst.width;
+    inst.frameRect.y = inst.currentFrame*inst.height; 
+}
