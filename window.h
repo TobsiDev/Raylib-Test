@@ -7,7 +7,7 @@
 
 #include "entity.h"
 
-#define GRAVITY 200
+#define GRAVITY 600
 #define PLAYER_JMP_SPD 700.0f
 #define PLAYER_HOR_SPD 200.0f
 

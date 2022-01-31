@@ -273,6 +273,7 @@ void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, 
         if (!hitObst)
         {
             player->position.y += player->speed*deltaTime;
+            player->hitbox.y += player->speed*deltaTime;
             player->speed = GRAVITY*deltaTime;
             player->canJump = false;
         }else{
