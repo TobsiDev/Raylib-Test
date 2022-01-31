@@ -12,7 +12,6 @@ entity::entity(std::string fileLocal, int AnimationFramesPrLine, int AnimationFr
     physicsPosition = {0.0f, 0.0f};
     frameRect = {0, 0, width, height};
     hitbox = {position.x, position.y, width, height};
-    //physicsBody = CreatePhysicsBodyRectangle(physicsPosition, width, height, 10);
     animFramesPrLine = AnimationFramesPrLine;
     animFrameLines = AnimationFrameLines;
     currentFrame = 0;
@@ -24,7 +23,6 @@ entity::entity(std::string fileLocal, int AnimationFramesPrLine, int AnimationFr
 entity::~entity()
 {
     UnloadImage(image);
-    //DestroyPhysicsBody(physicsBody);
 }
 
 void entity::debugLog(){
@@ -38,4 +36,10 @@ void entity::debugLog(){
     std::cout << "animFramesPrLine ; animFrameLines: " << animFramesPrLine << " ; " << animFrameLines << std::endl; 
     
     //std::cout << "What: " << a << std::endl;
+}
+
+
+void entity::updatePlayerPhysics(){
+    /*position.x += OFFSET;
+    position.y += OFFSET;*/
 }

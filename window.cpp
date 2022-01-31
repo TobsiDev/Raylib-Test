@@ -1,12 +1,9 @@
 #include "window.h"
 void makeWindow(){
+
     
     InitWindow(1280, 720, "Tobsi's Raylib Project");
     SetTargetFPS(60);
-    
-    //InitPhysics();
-    //SetPhysicsTimeStep(1);
-    //SetPhysicsGravity(0, 0.1f);
 
     float testX = 90;
     float testY = 90;
@@ -39,8 +36,22 @@ void makeWindow(){
 
     // Player texture 
     entity player("./res/img/player/SussyFlap-0001.png", 1, 16, 16, 16);
+    player.position = (Vector2){100, 200};
+    player.speed = 0;
+    //player.hSpeed = 100.0f;
+    //player.jumpSpeed = 1450.0f;
+    //player.gravity = 450;
+    player.canJump = false;
+
+    EnvItem envItems[] = {
+        {{ 0, 400, 1000, 200 }, 1, GRAY },
+        {{ 300, 200, 400, 10 }, 1, GRAY },
+        {{ 250, 300, 100, 10 }, 1, GRAY },
+        {{ 650, 300, 100, 10 }, 1, GRAY }
+    };
+    int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
+    
     entity testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
-    //testAnim.physicsBody->enabled = false;
 
 /*
     Image playerText = LoadImage("./res/img/player/SussyFlap-0001.png");
@@ -62,8 +73,7 @@ void makeWindow(){
 
     while (!WindowShouldClose())
     {
-        //UpdatePhysics();
-        
+        float deltaT = GetFrameTime();
 
         //TODO:
             // Work on a "physics" system or just implement physics.
@@ -73,21 +83,13 @@ void makeWindow(){
         BeginDrawing();
         //player.updatePlayerPhysics(); //
         
-        if (IsKeyDown(KEY_LEFT_SHIFT))
+        updatePlayer(&player, envItems, envItemsLength, deltaT);
+        
+        if (IsKeyPressed(KEY_R))
         {
-            playerSpeed = 2.5f;
-        }
-        else{
-            playerSpeed = 1.0f;
+            player.position = (Vector2){100, 200};
         }
         
-
-        if (IsKeyDown(KEY_LEFT)){player.position.x -= playerSpeed;}
-        if (IsKeyDown(KEY_RIGHT)){player.position.x += playerSpeed;}
-        if (IsKeyDown(KEY_UP)){player.position.y -= playerSpeed;}
-        if (IsKeyDown(KEY_DOWN)){player.position.y += playerSpeed;}
-        player.hitbox.x = player.position.x;
-        player.hitbox.y = player.position.y;
 
         if(IsKeyDown(KEY_KP_1)){
             DrawText("Key 1 is down", 10, 70, 28, PURPLE);
@@ -123,33 +125,13 @@ void makeWindow(){
             DrawText("PLAYER IS NOT TOUCHING THE BOX", 10, 130, 28, GREEN);
             player.isAnimActive = false;
         }
-        
-        //testFloor->isGrounded = true;
-        //testFloor->velocity.y = -VELOCITY*4;
 
-        // Draws physics boxes
-        /*int physicBodiesCount = GetPhysicsBodiesCount();
-        for (size_t i = 0; i < physicBodiesCount; i++)
-        {
-            PhysicsBody body = GetPhysicsBody(i);
-            int vertexCount = GetPhysicsShapeVerticesCount(i);
-            for (size_t j = 0; j < vertexCount; j++)
-            {
-                Vector2 vertexA = GetPhysicsShapeVertex(body, j);
-                int jj = (((j + 1) < vertexCount) ? (j + 1) : 0);
-                Vector2 vertexB = GetPhysicsShapeVertex(body, jj);
+        for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color);
 
-                DrawLine(vertexA.x, vertexA.y, vertexB.x, vertexB.y, LIME);
-            }
-            
-        }*/
-        
-        
         DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
         DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
+        DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, RED);
         DrawRectangleRec(platform, GRAY);
-        //CheckCollisionRecs() // https://github.com/raysan5/raylib/blob/master/examples/core/core_2d_camera_platformer.c 
-
         //player.debugLog();
 
         DrawFPS(10, 10);
@@ -157,15 +139,13 @@ void makeWindow(){
     }
 
     //UnloadTexture(playerTextu);
-    //player.~entity();
-    //testAnim.~entity();
+    player.~entity();
+    testAnim.~entity();
 
     /*DestroyPhysicsBody(testFloor);
     DestroyPhysicsBody(testFloor2);
     DestroyPhysicsBody(testFloor3);
     DestroyPhysicsBody(testFloor4);*/
-
-    //ClosePhysics();
 
     CloseWindow();     
 }
@@ -248,4 +228,63 @@ void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
     }
     inst.frameRect.x = lineNumb*inst.width;
     inst.frameRect.y = inst.currentFrame*inst.height; 
+}
+
+void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, float deltaTime){
+    /*if (IsKeyDown(KEY_LEFT_SHIFT))
+    {
+        playerSpeed = 2.5f;
+    }
+    else{
+        playerSpeed = 1.0f;
+    }*/
+
+    if (IsKeyDown(KEY_LEFT)){player->position.x -= PLAYER_HOR_SPD*deltaTime;}
+    if (IsKeyDown(KEY_RIGHT)){player->position.x += PLAYER_HOR_SPD*deltaTime;}
+    if (IsKeyDown(KEY_SPACE) && player->canJump)
+    {
+        player->speed = -PLAYER_JMP_SPD;
+        player->canJump = false;
+    }
+    
+    int hitObst = 0;
+    for (int i = 0; i < envItemsLength; i++)
+    {
+        EnvItem *ei = enviromentItems + i;
+        //Vector2 *p = &(player->hitbox);
+        if (CheckCollisionRecs(player->hitbox, ei->rect) /*ei->blocking &&
+            ei->rect.x <= p->x &&
+            ei->rect.x + ei->rect.width >= p->x &&
+            ei->rect.y >= p->y &&
+            ei->rect.y < p->y + player->speed*deltaTime*/)
+        {
+
+            /*hitObst = 1;
+            player->speed = 0.0f;
+            player->position.y = ei->rect.y;*/
+
+            hitObst = 1;
+            std::cout << "HIT OBST!!!!!!!!!!!!!" << std::endl;
+            player->speed = 0.0f;
+            player->position.y = ei->rect.y-player->frameRect.height; //ei->rect.width-player->height
+            player->hitbox.y = ei->rect.y-player->hitbox.height; //ei->rect.y-player->hitbox.height
+        }
+
+        if (!hitObst)
+        {
+            player->position.y += player->speed*deltaTime;
+            player->speed = GRAVITY*deltaTime;
+            player->canJump = false;
+        }else{
+            player->canJump = true;
+        }
+        
+        
+    }
+    
+
+    //if (IsKeyDown(KEY_UP)){player.position.y -= playerSpeed;}
+    //if (IsKeyDown(KEY_DOWN)){player.position.y += playerSpeed;}
+    player->hitbox.x = player->position.x;
+    player->hitbox.y = player->position.y;
 }
