@@ -4,6 +4,10 @@ void makeWindow(){
     InitWindow(1280, 720, "Tobsi's Raylib Project");
     SetTargetFPS(60);
     
+    //InitPhysics();
+    //SetPhysicsTimeStep(1);
+    //SetPhysicsGravity(0, 0.1f);
+
     float testX = 90;
     float testY = 90;
 
@@ -12,9 +16,31 @@ void makeWindow(){
     Image icon = LoadImage("./res/img/player/Icon-0001.png");
     SetWindowIcon(icon);
     
+    /*PhysicsBody testFloor = CreatePhysicsBodyRectangle((Vector2){150, 120}, 100, 20, 10);
+    testFloor->enabled = true;
+    testFloor->restitution = 0.1f;
+    testFloor->mass = 0.1f;
+    
+    PhysicsBody testFloor2 = CreatePhysicsBodyRectangle((Vector2){250, 120}, 100, 20, 10);
+    testFloor2->enabled = true;
+    testFloor2->restitution = 0.5f;
+    testFloor2->mass = 0.5f;
+    
+    PhysicsBody testFloor3 = CreatePhysicsBodyRectangle((Vector2){350, 120}, 100, 20, 10);
+    testFloor3->enabled = true;
+    testFloor3->restitution = 1;
+    testFloor3->mass = 1;
+
+    PhysicsBody testFloor4 = CreatePhysicsBodyRectangle((Vector2){450, 120}, 100, 20, 10);
+    testFloor4->enabled = true;
+    //testFloor4->mass = 1;
+    testFloor4->restitution = 10;
+    testFloor4->mass = 10;*/
+
     // Player texture 
-    Instance player("./res/img/player/SussyFlap-0001.png", 1, 16, 16, 16);
-    Instance testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
+    entity player("./res/img/player/SussyFlap-0001.png", 1, 16, 16, 16);
+    entity testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
+    //testAnim.physicsBody->enabled = false;
 
 /*
     Image playerText = LoadImage("./res/img/player/SussyFlap-0001.png");
@@ -36,7 +62,16 @@ void makeWindow(){
 
     while (!WindowShouldClose())
     {
+        //UpdatePhysics();
+        
+
+        //TODO:
+            // Work on a "physics" system or just implement physics.
+            // [ ] Jump
+            // [ ] Another platform
+
         BeginDrawing();
+        //player.updatePlayerPhysics(); //
         
         if (IsKeyDown(KEY_LEFT_SHIFT))
         {
@@ -89,6 +124,26 @@ void makeWindow(){
             player.isAnimActive = false;
         }
         
+        //testFloor->isGrounded = true;
+        //testFloor->velocity.y = -VELOCITY*4;
+
+        // Draws physics boxes
+        /*int physicBodiesCount = GetPhysicsBodiesCount();
+        for (size_t i = 0; i < physicBodiesCount; i++)
+        {
+            PhysicsBody body = GetPhysicsBody(i);
+            int vertexCount = GetPhysicsShapeVerticesCount(i);
+            for (size_t j = 0; j < vertexCount; j++)
+            {
+                Vector2 vertexA = GetPhysicsShapeVertex(body, j);
+                int jj = (((j + 1) < vertexCount) ? (j + 1) : 0);
+                Vector2 vertexB = GetPhysicsShapeVertex(body, jj);
+
+                DrawLine(vertexA.x, vertexA.y, vertexB.x, vertexB.y, LIME);
+            }
+            
+        }*/
+        
         
         DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
         DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
@@ -102,8 +157,16 @@ void makeWindow(){
     }
 
     //UnloadTexture(playerTextu);
-    player.~Instance();
-    testAnim.~Instance();
+    //player.~entity();
+    //testAnim.~entity();
+
+    /*DestroyPhysicsBody(testFloor);
+    DestroyPhysicsBody(testFloor2);
+    DestroyPhysicsBody(testFloor3);
+    DestroyPhysicsBody(testFloor4);*/
+
+    //ClosePhysics();
+
     CloseWindow();     
 }
 
@@ -164,7 +227,7 @@ void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animP
     frameRec.y = currentFrame*textureHeight; 
 }*/
 
-void playAnimLineRe(Instance& inst, int lineNumb, int animFramesPrLine){
+void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
     std::cout << "Bool: " << inst.isAnimActive << std::endl;
     std::cout << "lineNumb: " << lineNumb << std::endl;
     std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;

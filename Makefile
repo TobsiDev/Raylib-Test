@@ -1,15 +1,12 @@
 all: raylibProject
 
-raylibProject: main.o window.o pipes.o Instance.o
-	g++ -o raylibProject main.o window.o pipes.o Instance.o -lraylib 
+raylibProject: main.o window.o entity.o
+	g++ -o raylibProject main.o window.o entity.o -lraylib
 
-Instance.o: Instance.cpp Instance.h
-	g++ -c Instance.cpp
+entity.o: entity.cpp entity.h
+	g++ -c entity.cpp
 
-pipes.o: pipes.cpp pipes.h
-	g++ -c pipes.cpp
-
-window.o: window.cpp window.h
+window.o: window.cpp window.h 
 	g++ -c window.cpp
 
 main.o: main.cpp
