@@ -21,6 +21,8 @@ void makeWindow();
 void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animPrLine, int& animLines, bool& activeactive, Rectangle& frameRec, float& textureWidth, float& textureHeight);
 //void playAnimLine(int& frameCounter, int& currentFrame, int lineNumb, int animFramesPrLine, bool& active, Rectangle& frameRec, float& textureWidth, float& textureHeight);
 void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine);
+void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine);
 
 void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, float deltaTime);
+void resetPlayer(entity* player);
 void debugPlayerPhysics(entity* player);

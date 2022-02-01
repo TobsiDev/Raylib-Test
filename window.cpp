@@ -25,6 +25,7 @@ void makeWindow(){
     player.gravity = 180; // 270 or 170
     player.isAlive = true;
     player.canJump = true;
+    player.deathAnimFinished = false;
 
     /*EnvItem envItems[] = { // Test platformer platforms
         {{ 0, 400, 1000, 200 }, 1, GRAY },
@@ -34,15 +35,19 @@ void makeWindow(){
     };*/
 
     float pipeWidth = 120, pipeHeight = 245, pipeXPosition = 400;
-    float topPipeWidth = 160, spaceBetween = 70;
+    float topPipeWidth = 160, spaceBetween = 134;
     EnvItem envItems[] = {
-        // TOP
+        // TOP PIPE
         {{pipeXPosition, 0, pipeWidth, pipeHeight}, 1, DARKGREEN},
         {{pipeXPosition-((topPipeWidth-pipeWidth)/2), pipeHeight, topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
-        
+
+        // BOTTOM PIPE // TODO: MAKE THIS INTO A FUNCTION AND MAKE IT WORK
+        //{{pipeXPosition, GetScreenHeight()-pipeHeight-spaceBetween+(topPipeWidth*0.35f), pipeWidth, pipeHeight+spaceBetween}, 1, DARKGREEN},
+        //{{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight-((topPipeWidth*0.65f)), topPipeWidth, (topPipeWidth*0.35f)}, 1, GREEN},
+        //{{pipeXPosition, pipeHeight, pipeWidth, spaceBetween}, 0, PURPLE},
+
         {{pipeXPosition, GetScreenHeight()-spaceBetween-(topPipeWidth*0.35f), pipeWidth, pipeHeight}, 1, DARKGREEN},
         {{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight+((topPipeWidth*0.35f/*75*/)/2), topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
-        
         {{-40, 710, 1360, 20}, 1, (Color){255, 255, 255, 128}}
 
     };
@@ -61,16 +66,16 @@ void makeWindow(){
         updatePlayer(&player, envItems, envItemsLength, deltaT);       
         debugPlayerPhysics(&player);
 
-        BeginDrawing();        
+        BeginDrawing();
+
+        if (player.isAlive == false)
+        {
+            playDeathAnim(player, 0, 11);
+        }
         
         if (IsKeyPressed(KEY_R))
         {
-            player.position = (Vector2){100, 200};
-            player.hitbox.x = 100;
-            player.hitbox.y = 200;
-            player.speed = 0;
-            player.isAlive = true;
-            player.canJump = true;
+            resetPlayer(&player);
         }
         
 
@@ -91,9 +96,9 @@ void makeWindow(){
         DrawText("Hey from window", 100, 100, 24, RED);
 
         //Rectangle rec1 = {0, 0, 32, 32};
-        Rectangle platform = {20, 520, 420, 6};
+        //Rectangle platform = {20, 520, 420, 6};
 
-        if (CheckCollisionRecs(player.hitbox, platform))
+        /*if (CheckCollisionRecs(player.hitbox, platform))
         {
             DrawText("PLAYER IS TOUCHING THE BOX", 10, 130, 28, RED);
             player.isAnimActive = true;
@@ -102,14 +107,14 @@ void makeWindow(){
         else{
             DrawText("PLAYER IS NOT TOUCHING THE BOX", 10, 130, 28, GREEN);
             player.isAnimActive = false;
-        }
+        }*/
 
         for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color);
 
         DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
         DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
         DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, RED);
-        DrawRectangleRec(platform, GRAY);
+        //DrawRectangleRec(platform, GRAY);
         //player.debugLog();
 
         DrawFPS(10, 10);
@@ -122,9 +127,6 @@ void makeWindow(){
     CloseWindow();     
 }
 
-// Todo. 
-    // Make the same function, but you can only go down one line. Example: AnimLine(playerObject, GoDownFromX){}
-    // Make a struct or a class to have all the information about an entity. 
 void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animPrLine, int& animLines, bool& active, Rectangle& frameRec, float& textureWidth, float& textureHeight){
     std::cout << "Bool: " << active << std::endl;
     std::cout << "animLines: " << animLines << std::endl;
@@ -200,6 +202,31 @@ void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
     inst.frameRect.y = inst.currentFrame*inst.height; 
 }
 
+void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
+    //std::cout << "Bool: " << inst.isAnimActive << std::endl;
+    std::cout << "==========================================" << std::endl;
+    std::cout << "lineNumb: " << lineNumb << std::endl;
+    std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
+    std::cout << "currentFrame: " << inst.currentFrame << std::endl;
+    std::cout << "frameCounter: " << inst.frameCounter << std::endl;
+    if (inst.deathAnimFinished != true && inst.currentFrame < animFramesPrLine)
+    {
+        inst.frameCounter++;
+        if (inst.frameCounter > 4 && inst.deathAnimFinished != true)
+        {
+            inst.currentFrame++;
+            if (inst.currentFrame > animFramesPrLine)
+            {
+                inst.currentFrame = 0;
+                inst.deathAnimFinished = true;
+            }
+            inst.frameCounter = 0;
+        }
+    }
+    inst.frameRect.x = lineNumb*inst.width;
+    inst.frameRect.y = inst.currentFrame*inst.height; 
+}
+
 void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, float deltaTime){
     if (IsKeyDown(KEY_LEFT)){player->position.x -= player->hSpeed*deltaTime;}
     if (IsKeyDown(KEY_RIGHT)){player->position.x += player->hSpeed*deltaTime;}
@@ -244,6 +271,11 @@ void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, 
             //player->position.y = ei->rect.y-player->frameRect.height; //ei->rect.width-player->height
             //player->hitbox.y = ei->rect.y-player->hitbox.height; //ei->rect.y-player->hitbox.height
             player->isAlive = false;
+            player->canJump = false;
+            player->gravity = 0;
+            player->speed = 0;
+            player->hSpeed = 0;
+            player->jumpSpeed = 0;
         }
 
         if (!hitObst)
@@ -260,6 +292,27 @@ void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, 
     }
     player->hitbox.x = player->position.x;
     player->hitbox.y = player->position.y;
+}
+
+void resetPlayer(entity* player){
+            player->position = (Vector2){100, 200};
+            player->hitbox.x = 100;
+            player->hitbox.y = 200;
+            player->speed = 0;
+            player->isAlive = true;
+            player->canJump = true;
+            player->gravity = 180;
+            player->speed = 0;
+            player->hSpeed = 230.0f;
+            player->jumpSpeed = 195.0f;
+
+            // Animation reset
+            player->currentFrame = 0;
+            player->currentLine = 0;
+            player->frameCounter = 0;
+            player->deathAnimFinished = false;
+            player->frameRect.x = player->width;
+            player->frameRect.y = player->height;
 }
 
 void debugPlayerPhysics(entity* player){
