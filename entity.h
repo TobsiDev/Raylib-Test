@@ -28,6 +28,7 @@ public:
     float jumpSpeed;
     float gravity;
     bool canJump;
+    bool isAlive;
 
     entity(std::string fileLocal, int AnimationFramesPrLine, int AnimationFrameLines, int FrameHeight, int FrameWidth);
     ~entity();

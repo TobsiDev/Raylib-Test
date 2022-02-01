@@ -21,16 +21,32 @@ void makeWindow(){
     player.jumpSpeed = 250.0f;
     player.gravity = 400;*/
     player.hSpeed = 230.0f;
-    player.jumpSpeed = 150.0f;
-    player.gravity = 170;
-    player.canJump = false;
+    player.jumpSpeed = 195.0f; // 150.0f
+    player.gravity = 180; // 270 or 170
+    player.isAlive = true;
+    player.canJump = true;
 
-    EnvItem envItems[] = {
+    /*EnvItem envItems[] = { // Test platformer platforms
         {{ 0, 400, 1000, 200 }, 1, GRAY },
         {{ 300, 300, 400, 10 }, 1, GRAY },
         {{ 250, 200, 100, 10 }, 1, GRAY },
         {{ 650, 350, 100, 10 }, 1, GRAY }
+    };*/
+
+    float pipeWidth = 120, pipeHeight = 245, pipeXPosition = 400;
+    float topPipeWidth = 160, spaceBetween = 70;
+    EnvItem envItems[] = {
+        // TOP
+        {{pipeXPosition, 0, pipeWidth, pipeHeight}, 1, DARKGREEN},
+        {{pipeXPosition-((topPipeWidth-pipeWidth)/2), pipeHeight, topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
+        
+        {{pipeXPosition, GetScreenHeight()-spaceBetween-(topPipeWidth*0.35f), pipeWidth, pipeHeight}, 1, DARKGREEN},
+        {{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight+((topPipeWidth*0.35f/*75*/)/2), topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
+        
+        {{-40, 710, 1360, 20}, 1, (Color){255, 255, 255, 128}}
+
     };
+
     int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
     
     entity testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
@@ -50,6 +66,11 @@ void makeWindow(){
         if (IsKeyPressed(KEY_R))
         {
             player.position = (Vector2){100, 200};
+            player.hitbox.x = 100;
+            player.hitbox.y = 200;
+            player.speed = 0;
+            player.isAlive = true;
+            player.canJump = true;
         }
         
 
@@ -182,18 +203,22 @@ void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
 void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, float deltaTime){
     if (IsKeyDown(KEY_LEFT)){player->position.x -= player->hSpeed*deltaTime;}
     if (IsKeyDown(KEY_RIGHT)){player->position.x += player->hSpeed*deltaTime;}
-    if (IsKeyDown(KEY_SPACE) && player->canJump)
+    /*if (IsKeyDown(KEY_SPACE) && player->canJump) // Platformer jump
     {
         player->speed = -player->jumpSpeed;
         player->canJump = false;
+    }*/
+    if (IsKeyPressed(KEY_SPACE) && player->canJump && player->isAlive)
+    {
+        player->speed = -player->jumpSpeed;
+        //player->canJump = false;
     }
     
     int hitObst = 0;
     for (int i = 0; i < envItemsLength; i++)
     {
         EnvItem *ei = enviromentItems + i;
-        //Vector2 *p = &(player->hitbox);
-        if (CheckCollisionRecs(player->hitbox, ei->rect))
+        /*if (CheckCollisionRecs(player->hitbox, ei->rect)) // Platformer controls
         {
             hitObst = 1;
             //std::cout << "HIT OBST!!!!!!!!!!!!!" << std::endl;
@@ -208,6 +233,25 @@ void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, 
             player->hitbox.y += player->speed*deltaTime;
             player->speed += player->gravity*deltaTime;
             player->canJump = false;
+        }else{
+            player->canJump = true;
+        }*/
+        if (CheckCollisionRecs(player->hitbox, ei->rect))
+        {
+            //hitObst = 1;
+            //std::cout << "HIT OBST!!!!!!!!!!!!!" << std::endl;
+            player->speed = 0.0f;
+            //player->position.y = ei->rect.y-player->frameRect.height; //ei->rect.width-player->height
+            //player->hitbox.y = ei->rect.y-player->hitbox.height; //ei->rect.y-player->hitbox.height
+            player->isAlive = false;
+        }
+
+        if (!hitObst)
+        {
+            player->position.y += player->speed*deltaTime;
+            player->hitbox.y += player->speed*deltaTime;
+            player->speed += player->gravity*deltaTime;
+            //player->canJump = false;
         }else{
             player->canJump = true;
         }
@@ -269,4 +313,11 @@ void debugPlayerPhysics(entity* player){
             std::string str = {"player-gravity: " + std::to_string(player->gravity)};
             DrawText(str.c_str(), 960, 70, 24, PURPLE);
         }
+
+        std::string canJump = {"player canJump: " + std::to_string(player->canJump)};
+        DrawText(canJump.c_str(), 960, 95, 24, PURPLE);
+
+        std::string alive = {"player alive: " + std::to_string(player->isAlive)};
+        DrawText(alive.c_str(), 960, 120, 24, PURPLE);
+
 }
