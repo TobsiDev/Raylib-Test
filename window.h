@@ -23,3 +23,4 @@ void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animP
 void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine);
 
 void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, float deltaTime);
+void debugPlayerPhysics(entity* player);

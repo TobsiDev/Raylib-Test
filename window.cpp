@@ -17,9 +17,12 @@ void makeWindow(){
     entity player("./res/img/player/SussyFlap-0001.png", 1, 16, 16, 16);
     player.position = (Vector2){100, 200};
     player.speed = 0;
-    player.hSpeed = 275.0f;
+    /*player.hSpeed = 275.0f;
     player.jumpSpeed = 250.0f;
-    player.gravity = 400;
+    player.gravity = 400;*/
+    player.hSpeed = 230.0f;
+    player.jumpSpeed = 150.0f;
+    player.gravity = 170;
     player.canJump = false;
 
     EnvItem envItems[] = {
@@ -39,8 +42,8 @@ void makeWindow(){
             // [X] Jump
             // [X] Another platform
         float deltaT = GetFrameTime();
-        updatePlayer(&player, envItems, envItemsLength, deltaT);
-
+        updatePlayer(&player, envItems, envItemsLength, deltaT);       
+        debugPlayerPhysics(&player);
 
         BeginDrawing();        
         
@@ -177,8 +180,8 @@ void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
 }
 
 void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, float deltaTime){
-    if (IsKeyDown(KEY_LEFT)){player->position.x -= PLAYER_HOR_SPD*deltaTime;}
-    if (IsKeyDown(KEY_RIGHT)){player->position.x += PLAYER_HOR_SPD*deltaTime;}
+    if (IsKeyDown(KEY_LEFT)){player->position.x -= player->hSpeed*deltaTime;}
+    if (IsKeyDown(KEY_RIGHT)){player->position.x += player->hSpeed*deltaTime;}
     if (IsKeyDown(KEY_SPACE) && player->canJump)
     {
         player->speed = -player->jumpSpeed;
@@ -193,7 +196,7 @@ void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, 
         if (CheckCollisionRecs(player->hitbox, ei->rect))
         {
             hitObst = 1;
-            std::cout << "HIT OBST!!!!!!!!!!!!!" << std::endl;
+            //std::cout << "HIT OBST!!!!!!!!!!!!!" << std::endl;
             player->speed = 0.0f;
             player->position.y = ei->rect.y-player->frameRect.height; //ei->rect.width-player->height
             player->hitbox.y = ei->rect.y-player->hitbox.height; //ei->rect.y-player->hitbox.height
@@ -213,4 +216,57 @@ void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, 
     }
     player->hitbox.x = player->position.x;
     player->hitbox.y = player->position.y;
+}
+
+void debugPlayerPhysics(entity* player){
+    if (IsKeyPressed(KEY_Q))
+        {
+            player->hSpeed -= 5;
+            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
+            DrawText(str.c_str(), 960, 20, 24, PURPLE);
+        }else if (IsKeyPressed(KEY_W))
+        {
+            player->hSpeed += 5;
+            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
+            DrawText(str.c_str(), 960, 20, 24, PURPLE);
+        }
+        else
+        {
+            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
+            DrawText(str.c_str(), 960, 20, 24, PURPLE);
+        }
+
+        if (IsKeyPressed(KEY_A))
+        {
+            player->jumpSpeed -= 5;
+            std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
+            DrawText(str.c_str(), 960, 45, 24, PURPLE);
+        }else if (IsKeyPressed(KEY_S))
+        {
+            player->jumpSpeed += 5;
+            std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
+            DrawText(str.c_str(), 960, 45, 24, PURPLE);
+        }
+        else
+        {
+            std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
+            DrawText(str.c_str(), 960, 45, 24, PURPLE);
+        }
+        
+        if (IsKeyPressed(KEY_Z))
+        {
+            player->gravity -= 5;
+            std::string str = {"player-gravity: " + std::to_string(player->gravity)};
+            DrawText(str.c_str(), 960, 70, 24, PURPLE);
+        }else if (IsKeyPressed(KEY_X))
+        {
+            player->gravity += 5;
+            std::string str = {"player-gravity: " + std::to_string(player->gravity)};
+            DrawText(str.c_str(), 960, 70, 24, PURPLE);
+        }
+        else
+        {
+            std::string str = {"player-gravity: " + std::to_string(player->gravity)};
+            DrawText(str.c_str(), 960, 70, 24, PURPLE);
+        }
 }
