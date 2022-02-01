@@ -1,6 +1,7 @@
 ### TODO
 
-- [X] Hop mens man er i luften (Hop hele tiden)
+- [X] Implement flappy sus movement
 - [X] Pipe collision
-  - [X] Bunden = død
+  - [X] Bottom = death
+- [ ] Play player death animation when touching the pipes
 - [ ] Camera follow player (Or just move the pipes)
