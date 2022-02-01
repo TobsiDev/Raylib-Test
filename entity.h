@@ -14,7 +14,7 @@ public:
     Vector2 position = {0.0f, 0.0f};
     Vector2 physicsPosition = {0.0f, 0.0f};
     Rectangle frameRect = {0, 0, width, height};
-    Rectangle hitbox = {position.x, position.y, width, height+1};
+    Rectangle hitbox = {position.x, position.y, width, height};
     float width, height;
     int animFramesPrLine, animFrameLines;
     int currentFrame = 0;

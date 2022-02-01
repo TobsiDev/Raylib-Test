@@ -7,9 +7,9 @@
 
 #include "entity.h"
 
-#define GRAVITY 600
-#define PLAYER_JMP_SPD 700.0f
-#define PLAYER_HOR_SPD 200.0f
+#define GRAVITY 400
+#define PLAYER_JMP_SPD 250.0f
+#define PLAYER_HOR_SPD 275.0f
 
 typedef struct EnvItem {
     Rectangle rect;
