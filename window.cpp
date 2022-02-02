@@ -36,23 +36,31 @@ void makeWindow(){
 
     float pipeWidth = 120, pipeHeight = 245, pipeXPosition = 400;
     float topPipeWidth = 160, spaceBetween = 134;
-    EnvItem envItems[] = {
-        // TOP PIPE
-        {{pipeXPosition, 0, pipeWidth, pipeHeight}, 1, DARKGREEN},
-        {{pipeXPosition-((topPipeWidth-pipeWidth)/2), pipeHeight, topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
+    pipe pipes(560, 0);
+    pipes.setPipe();
+    // EnvItem testPipe[] = {
+    //     pipes.pipeItem[0],
+    //     pipes.pipeItem[1]
+    // };
+    // EnvItem envItems[] = {
+    //     // TOP PIPE
+    //     {{pipeXPosition, 0, pipeWidth, pipeHeight}, 1, DARKGREEN},
+    //     {{pipeXPosition-((topPipeWidth-pipeWidth)/2), pipeHeight, topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
 
-        // BOTTOM PIPE // TODO: MAKE THIS INTO A FUNCTION AND MAKE IT WORK
-        //{{pipeXPosition, GetScreenHeight()-pipeHeight-spaceBetween+(topPipeWidth*0.35f), pipeWidth, pipeHeight+spaceBetween}, 1, DARKGREEN},
-        //{{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight-((topPipeWidth*0.65f)), topPipeWidth, (topPipeWidth*0.35f)}, 1, GREEN},
-        //{{pipeXPosition, pipeHeight, pipeWidth, spaceBetween}, 0, PURPLE},
+    //     // BOTTOM PIPE // TODO: MAKE THIS INTO A FUNCTION AND MAKE IT WORK
+    //     //{{pipeXPosition, GetScreenHeight()-pipeHeight-spaceBetween+(topPipeWidth*0.35f), pipeWidth, pipeHeight+spaceBetween}, 1, DARKGREEN},
+    //     //{{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight-((topPipeWidth*0.65f)), topPipeWidth, (topPipeWidth*0.35f)}, 1, GREEN},
+    //     //{{pipeXPosition, pipeHeight, pipeWidth, spaceBetween}, 0, PURPLE},
 
-        {{pipeXPosition, GetScreenHeight()-spaceBetween-(topPipeWidth*0.35f), pipeWidth, pipeHeight}, 1, DARKGREEN},
-        {{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight+((topPipeWidth*0.35f/*75*/)/2), topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
-        {{-40, 710, 1360, 20}, 1, (Color){255, 255, 255, 128}}
+    //     {{pipeXPosition, GetScreenHeight()-spaceBetween-(topPipeWidth*0.35f), pipeWidth, pipeHeight}, 1, DARKGREEN},
+    //     {{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight+((topPipeWidth*0.35f/*75*/)/2), topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
+    //     {{-40, 710, 1360, 20}, 1, (Color){255, 255, 255, 128}}
 
-    };
+    // };
+    EnvItem deathFloor = {{-40, 710, 1360, 20}, 1, (Color){255, 255, 255, 128}};
 
-    int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
+    // int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
+    int envItemsLength = sizeof(pipes.pipeItem)/sizeof(pipes.pipeItem[0]);
     
     entity testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
 
@@ -63,7 +71,18 @@ void makeWindow(){
             // [X] Jump
             // [X] Another platform
         float deltaT = GetFrameTime();
-        updatePlayer(&player, envItems, envItemsLength, deltaT);       
+        updatePlayer(&player, pipes.pipeItem, envItemsLength, deltaT);
+        if (player.isAlive != false)
+        {
+            /* code */
+            pipes.updatePipes();
+        }
+        
+        
+        // pipes.updatePipes(testPipe[1]);
+        // testPipe[0].rect.x += 1;
+        pipes.setPipe();
+        std::cout << "pipes.position : "<< pipes.position.x << " ; " << pipes.position.y << std::endl;
         debugPlayerPhysics(&player);
 
         BeginDrawing();
@@ -75,6 +94,7 @@ void makeWindow(){
         
         if (IsKeyPressed(KEY_R))
         {
+            pipes.resetPipe(560);
             resetPlayer(&player);
         }
         
@@ -109,7 +129,8 @@ void makeWindow(){
             player.isAnimActive = false;
         }*/
 
-        for (int i = 0; i < envItemsLength; i++) DrawRectangleRec(envItems[i].rect, envItems[i].color);
+        for (int i = 0; i < envItemsLength; i++) {DrawRectangleRec(pipes.pipeItem[i].rect, pipes.pipeItem[i].color); std::cout << "pipes.pipeItem[i].rect.x : " << pipes.pipeItem[i].rect.x << std::endl;}
+        DrawRectangleRec(deathFloor.rect, deathFloor.color);
 
         DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
         DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
@@ -121,6 +142,7 @@ void makeWindow(){
         EndDrawing();
     }
 
+    // pipe pipe(3, 6);
     player.~entity();
     testAnim.~entity();
 
