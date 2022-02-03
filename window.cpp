@@ -72,6 +72,7 @@ void makeWindow(){
             // [X] Another platform
         float deltaT = GetFrameTime();
         updatePlayer(&player, pipes.pipeItem, envItemsLength, deltaT);
+        updatePlayer(&player, &deathFloor, 1, deltaT);
         if (player.isAlive != false)
         {
             /* code */
