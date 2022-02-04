@@ -1,105 +1,94 @@
+// TODO:
+    // SOMETIMES THE PLAY DEATH ANIMATION IS GETTING CALLED 2 TIMES ( I THINK ). 
+    // THIS RESULTS IN THE ANIMATION BEING PLAYED RIGHT AFTER THE PLAYER PRESSES THE RESET BUTTON
+
 #include "window.h"
 void makeWindow(){
 
-    
+    // sets the window size and text.
     InitWindow(1280, 720, "Tobsi's Raylib Project");
-    SetTargetFPS(60);
-
-    float testX = 90;
-    float testY = 90;
-
-    float playerSpeed = 1.0f;
-
+    SetTargetFPS(60); // Sets the targeted FPS (The FPS we're going for)
+    
+    // Loads and sets the window icon
     Image icon = LoadImage("./res/img/player/Icon-0001.png");
     SetWindowIcon(icon);
     
     // Player texture 
     entity player("./res/img/player/SussyFlap-0001.png", 1, 16, 16, 16);
+    // Init player position and variables
     player.position = (Vector2){100, 200};
     player.speed = 0;
-    /*player.hSpeed = 275.0f;
-    player.jumpSpeed = 250.0f;
-    player.gravity = 400;*/
-    player.hSpeed = 230.0f;
-    player.jumpSpeed = 195.0f; // 150.0f
-    player.gravity = 180; // 270 or 170
+    player.hSpeed = 330.0f;
+    player.jumpSpeed = 395.0f; // 150.0f
+    player.gravity = 850; // 270 or 170
     player.isAlive = true;
     player.canJump = true;
     player.deathAnimFinished = false;
 
-    /*EnvItem envItems[] = { // Test platformer platforms
-        {{ 0, 400, 1000, 200 }, 1, GRAY },
-        {{ 300, 300, 400, 10 }, 1, GRAY },
-        {{ 250, 200, 100, 10 }, 1, GRAY },
-        {{ 650, 350, 100, 10 }, 1, GRAY }
-    };*/
-
+    // Test Pipes
     float pipeWidth = 120, pipeHeight = 245, pipeXPosition = 400;
     float topPipeWidth = 160, spaceBetween = 134;
     pipe pipes(560, 0);
+    pipe pipes2(560+250, 0);
     pipes.setPipe();
-    // EnvItem testPipe[] = {
-    //     pipes.pipeItem[0],
-    //     pipes.pipeItem[1]
-    // };
-    // EnvItem envItems[] = {
-    //     // TOP PIPE
-    //     {{pipeXPosition, 0, pipeWidth, pipeHeight}, 1, DARKGREEN},
-    //     {{pipeXPosition-((topPipeWidth-pipeWidth)/2), pipeHeight, topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
+    pipes2.setPipe();
 
-    //     // BOTTOM PIPE // TODO: MAKE THIS INTO A FUNCTION AND MAKE IT WORK
-    //     //{{pipeXPosition, GetScreenHeight()-pipeHeight-spaceBetween+(topPipeWidth*0.35f), pipeWidth, pipeHeight+spaceBetween}, 1, DARKGREEN},
-    //     //{{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight-((topPipeWidth*0.65f)), topPipeWidth, (topPipeWidth*0.35f)}, 1, GREEN},
-    //     //{{pipeXPosition, pipeHeight, pipeWidth, spaceBetween}, 0, PURPLE},
-
-    //     {{pipeXPosition, GetScreenHeight()-spaceBetween-(topPipeWidth*0.35f), pipeWidth, pipeHeight}, 1, DARKGREEN},
-    //     {{pipeXPosition-((topPipeWidth-pipeWidth)/2), GetScreenHeight()-pipeHeight+((topPipeWidth*0.35f/*75*/)/2), topPipeWidth, (topPipeWidth*0.35f/*75*/)}, 1, GREEN},
-    //     {{-40, 710, 1360, 20}, 1, (Color){255, 255, 255, 128}}
-
-    // };
+    // The death triger at the bottom (Currently visible for debugging.)
     EnvItem deathFloor = {{-40, 710, 1360, 20}, 1, (Color){255, 255, 255, 128}};
 
-    // int envItemsLength = sizeof(envItems)/sizeof(envItems[0]);
+    // Length of the environment items array
     int envItemsLength = sizeof(pipes.pipeItem)/sizeof(pipes.pipeItem[0]);
     
+    // Test animation
     entity testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
 
+    // Main game loop
     while (!WindowShouldClose())
     {
-        //TODO:
-            // Work on a "physics" system or just implement physics.
-            // [X] Jump
-            // [X] Another platform
+        // Delta
         float deltaT = GetFrameTime();
-        updatePlayer(&player, pipes.pipeItem, envItemsLength, deltaT);
-        updatePlayer(&player, &deathFloor, 1, deltaT);
+
+        // Updates the player and checks for collision under
+        updatePlayer(&player, deltaT);
+        updatePlayerCollision(&player, pipes.pipeItem, envItemsLength);
+        updatePlayerCollision(&player, pipes2.pipeItem, envItemsLength);
+        updatePlayerCollision(&player, &deathFloor, 1);
+
+        // Checks if the player is alive and updates the pipes
         if (player.isAlive != false)
         {
             /* code */
             pipes.updatePipes();
+            pipes2.updatePipes();
         }
         
-        
-        // pipes.updatePipes(testPipe[1]);
-        // testPipe[0].rect.x += 1;
+        // Updates the pipe position
         pipes.setPipe();
+        pipes2.setPipe();
+
+        ///             FOR TESTING             ///
         std::cout << "pipes.position : "<< pipes.position.x << " ; " << pipes.position.y << std::endl;
         debugPlayerPhysics(&player);
+        ///             FOR TESTING             ///
 
         BeginDrawing();
 
+        // Checks if the player is alive and plays the death animation if the player is dead
         if (player.isAlive == false)
         {
             playDeathAnim(player, 0, 11);
         }
         
+        // Reset key
         if (IsKeyPressed(KEY_R))
         {
             pipes.resetPipe(560);
+            pipes2.resetPipe(560+250);
             resetPlayer(&player);
         }
         
 
+        ///             TESTING ANIMATIONS AND PIPES Y POSITION             ///
         if(IsKeyDown(KEY_KP_1)){
             DrawText("Key 1 is down", 10, 70, 28, PURPLE);
 
@@ -121,102 +110,51 @@ void makeWindow(){
         }
         else if (testAnim.isAnimActive == false && (testAnim.frameCounter != 0 || testAnim.currentFrame != 0)){testAnim.frameCounter = 0; testAnim.currentFrame = 0;/*testAnim.frameRect.x = 0; testAnim.frameRect.y = 0;*/}
         else {DrawText("None of the TestKeys are down", 10, 70, 28, PURPLE); testAnim.isAnimActive = false; testAnim.frameRect.x = 0; testAnim.frameRect.y = 0; std::string PipeYOffsetStr = {"pipes.plusY: " + std::to_string(pipes.plusY)}; DrawText(PipeYOffsetStr.c_str(), 100, 100, 24, RED);}        
+        ///             TESTING ANIMATIONS AND PIPES Y POSITION             ///
 
+        // Clears the background and sets it to a specific color
         ClearBackground((Color){12, 109, 199, 255});
-        
 
-        //Rectangle rec1 = {0, 0, 32, 32};
-        //Rectangle platform = {20, 520, 420, 6};
+        // Draws the pipes
+        for (int i = 0; i < envItemsLength; i++) {
+            DrawRectangleRec(pipes.pipeItem[i].rect, pipes.pipeItem[i].color); 
+            DrawRectangleRec(pipes2.pipeItem[i].rect, pipes2.pipeItem[i].color);
+            // std::cout << "pipes.pipeItem[i].rect.x : " << pipes.pipeItem[i].rect.x << std::endl;
 
-        /*if (CheckCollisionRecs(player.hitbox, platform))
-        {
-            DrawText("PLAYER IS TOUCHING THE BOX", 10, 130, 28, RED);
-            player.isAnimActive = true;
-            playAnim(player.frameCounter, player.currentFrame, player.currentLine, player.animFramesPrLine, player.animFrameLines, player.isAnimActive, player.frameRect, player.width, player.height);
         }
-        else{
-            DrawText("PLAYER IS NOT TOUCHING THE BOX", 10, 130, 28, GREEN);
-            player.isAnimActive = false;
-        }*/
 
-        for (int i = 0; i < envItemsLength; i++) {DrawRectangleRec(pipes.pipeItem[i].rect, pipes.pipeItem[i].color); std::cout << "pipes.pipeItem[i].rect.x : " << pipes.pipeItem[i].rect.x << std::endl;}
+        // Draws the death floor
         DrawRectangleRec(deathFloor.rect, deathFloor.color);
 
+        // Draws the player, test animation and the player hitbox
         DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
         DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
         DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, RED);
-        //DrawRectangleRec(platform, GRAY);
-        //player.debugLog();
-
+        
+        // Shows the FPS
         DrawFPS(10, 10);
         EndDrawing();
     }
 
-    // pipe pipe(3, 6);
+    // Destroys the texture and entity
     player.~entity();
     testAnim.~entity();
 
+    // Closes the window
     CloseWindow();     
 }
 
-void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animPrLine, int& animLines, bool& active, Rectangle& frameRec, float& textureWidth, float& textureHeight){
-    std::cout << "Bool: " << active << std::endl;
-    std::cout << "animLines: " << animLines << std::endl;
-    std::cout << "animPrLine: " << animPrLine << std::endl;
-    std::cout << "currentLine: " << currentLine << std::endl;
-    std::cout << "currentFrame: " << currentFrame << std::endl;
-    std::cout << "frameCounter: " << frameCounter << std::endl;
-    if (active)
-    {
-        frameCounter++;
-        if (frameCounter > 4)
-        {
-            currentFrame++;
-            if (currentFrame > animPrLine)
-            {
-                currentFrame = 0;
-                currentLine++;
-                if (currentLine > animLines)
-                {
-                    currentLine = 0;
-                }
-            }
-            frameCounter = 0;
-        }
-    }
-    frameRec.x = currentFrame*textureWidth;
-    frameRec.y = currentLine*textureHeight; 
-}
-
-/*void playAnimLine(int& frameCounter, int& currentFrame, int lineNumb, int animFramesPrLine, bool& active, Rectangle& frameRec, float& textureWidth, float& textureHeight){
-    std::cout << "Bool: " << active << std::endl;
-    std::cout << "lineNumb: " << lineNumb << std::endl;
-    std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
-    std::cout << "currentFrame: " << currentFrame << std::endl;
-    std::cout << "frameCounter: " << frameCounter << std::endl;
-    if (active)
-    {
-        frameCounter++;
-        if (frameCounter > 4)
-        {
-            currentFrame++;
-            if (currentFrame > animFramesPrLine)
-            {
-                currentFrame = 0;
-            }
-            frameCounter = 0;
-        }
-    }
-    frameRec.x = lineNumb*textureWidth;
-    frameRec.y = currentFrame*textureHeight; 
-}*/
-
+// Plays a animation line
 void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
+    ///             DEBUGS THE ANIMATION                ///
     std::cout << "Bool: " << inst.isAnimActive << std::endl;
     std::cout << "lineNumb: " << lineNumb << std::endl;
     std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
     std::cout << "currentFrame: " << inst.currentFrame << std::endl;
     std::cout << "frameCounter: " << inst.frameCounter << std::endl;
+    ///             DEBUGS THE ANIMATION                ///
+
+    // plays the animation
     if (inst.isAnimActive)
     {
         inst.frameCounter++;
@@ -230,17 +168,24 @@ void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
             inst.frameCounter = 0;
         }
     }
+
+    // Sets the position on the texture (If the next frame is 16px to the right, it will move 16px to the right)
     inst.frameRect.x = lineNumb*inst.width;
     inst.frameRect.y = inst.currentFrame*inst.height; 
 }
 
+// Plays the death animation
 void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
-    //std::cout << "Bool: " << inst.isAnimActive << std::endl;
+
+    ///             DEBUGS THE ANIMATION                ///
     std::cout << "==========================================" << std::endl;
     std::cout << "lineNumb: " << lineNumb << std::endl;
     std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
     std::cout << "currentFrame: " << inst.currentFrame << std::endl;
     std::cout << "frameCounter: " << inst.frameCounter << std::endl;
+    ///             DEBUGS THE ANIMATION                ///
+
+    // plays the animation
     if (inst.deathAnimFinished != true && inst.currentFrame < animFramesPrLine)
     {
         inst.frameCounter++;
@@ -255,53 +200,39 @@ void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
             inst.frameCounter = 0;
         }
     }
+
+    // Sets the position on the texture (If the next frame is 16px to the right, it will move 16px to the right)
     inst.frameRect.x = lineNumb*inst.width;
     inst.frameRect.y = inst.currentFrame*inst.height; 
 }
 
-void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, float deltaTime){
-    if (IsKeyDown(KEY_LEFT)){player->position.x -= player->hSpeed*deltaTime;}
-    if (IsKeyDown(KEY_RIGHT)){player->position.x += player->hSpeed*deltaTime;}
-    /*if (IsKeyDown(KEY_SPACE) && player->canJump) // Platformer jump
+// Updates the player collision box, position and handles the player movement
+void updatePlayer(entity* player, float deltaTime){
+    if (IsKeyDown(KEY_LEFT)){player->position.x -= player->hSpeed*deltaTime;} // Moves the player to the left if the left arrow key is being held down
+    if (IsKeyDown(KEY_RIGHT)){player->position.x += player->hSpeed*deltaTime;} // Moves the player to the right if the right arrow key is being held down
+    if (IsKeyPressed(KEY_SPACE) && player->canJump && player->isAlive) // Player jumps
     {
         player->speed = -player->jumpSpeed;
-        player->canJump = false;
-    }*/
-    if (IsKeyPressed(KEY_SPACE) && player->canJump && player->isAlive)
-    {
-        player->speed = -player->jumpSpeed;
-        //player->canJump = false;
     }
-    
+
+    // Sets the player position, hitbox and gravity (It makes the player fall down if there is nothing blocking them)
+    player->position.y += player->speed*deltaTime;
+    player->hitbox.y += player->speed*deltaTime;
+    player->speed += player->gravity*deltaTime;
+    player->hitbox.x = player->position.x;
+    player->hitbox.y = player->position.y;
+}
+
+    // Checks for player collision
+    void updatePlayerCollision(entity* player, EnvItem* enviromentItems, int envItemsLength){
     int hitObst = 0;
-    for (int i = 0; i < envItemsLength; i++)
+    for (int i = 0; i < envItemsLength; i++) // Goes thru every collision and checks if the player is hitting it
     {
         EnvItem *ei = enviromentItems + i;
-        /*if (CheckCollisionRecs(player->hitbox, ei->rect)) // Platformer controls
-        {
-            hitObst = 1;
-            //std::cout << "HIT OBST!!!!!!!!!!!!!" << std::endl;
+        if (CheckCollisionRecs(player->hitbox, ei->rect) && ei->blocking == 1) // Checks if the player is hitting a deadly object.
+        {   
+            // If the player is dead it will not move. That's why everything is being turned to 0 or false
             player->speed = 0.0f;
-            player->position.y = ei->rect.y-player->frameRect.height; //ei->rect.width-player->height
-            player->hitbox.y = ei->rect.y-player->hitbox.height; //ei->rect.y-player->hitbox.height
-        }
-
-        if (!hitObst)
-        {
-            player->position.y += player->speed*deltaTime;
-            player->hitbox.y += player->speed*deltaTime;
-            player->speed += player->gravity*deltaTime;
-            player->canJump = false;
-        }else{
-            player->canJump = true;
-        }*/
-        if (CheckCollisionRecs(player->hitbox, ei->rect))
-        {
-            //hitObst = 1;
-            //std::cout << "HIT OBST!!!!!!!!!!!!!" << std::endl;
-            player->speed = 0.0f;
-            //player->position.y = ei->rect.y-player->frameRect.height; //ei->rect.width-player->height
-            //player->hitbox.y = ei->rect.y-player->hitbox.height; //ei->rect.y-player->hitbox.height
             player->isAlive = false;
             player->canJump = false;
             player->gravity = 0;
@@ -312,33 +243,30 @@ void updatePlayer(entity* player, EnvItem* enviromentItems, int envItemsLength, 
 
         if (!hitObst)
         {
-            player->position.y += player->speed*deltaTime;
-            player->hitbox.y += player->speed*deltaTime;
-            player->speed += player->gravity*deltaTime;
-            //player->canJump = false;
-        }else{
+        }
+        else{
             player->canJump = true;
         }
         
         
     }
-    player->hitbox.x = player->position.x;
-    player->hitbox.y = player->position.y;
 }
 
+// Resets the player variables
 void resetPlayer(entity* player){
+            // Player variables are being reset
             player->position = (Vector2){100, 200};
             player->hitbox.x = 100;
             player->hitbox.y = 200;
             player->speed = 0;
             player->isAlive = true;
             player->canJump = true;
-            player->gravity = 180;
+            player->gravity = 850;
             player->speed = 0;
-            player->hSpeed = 230.0f;
-            player->jumpSpeed = 195.0f;
+            player->hSpeed = 330.0f;
+            player->jumpSpeed = 395.0f;
 
-            // Animation reset
+            // The player animation variables are being reset
             player->currentFrame = 0;
             player->currentLine = 0;
             player->frameCounter = 0;
@@ -347,30 +275,35 @@ void resetPlayer(entity* player){
             player->frameRect.y = player->height;
 }
 
+// Used to debug the player variables
+// It displays the variables and I'm able to edit them with a button press
+// Whats being read/edited can be found in the string variable
 void debugPlayerPhysics(entity* player){
-    if (IsKeyPressed(KEY_Q))
+    if (IsKeyPressed(KEY_Q)) // Key being used ( This will be on the left of the other key and decrease the value of the variable )
         {
-            player->hSpeed -= 5;
-            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
-            DrawText(str.c_str(), 960, 20, 24, PURPLE);
-        }else if (IsKeyPressed(KEY_W))
+            player->hSpeed -= 5; // What and how much the variables is being changed
+            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)}; // The string is being used to write it to the screen
+            DrawText(str.c_str(), 960, 20, 24, PURPLE); // Writes the string to the screen in purple
+        }
+        else if (IsKeyPressed(KEY_W)) // The other key being used. This key is right next to the first key and increses the variable
         {
             player->hSpeed += 5;
             std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
             DrawText(str.c_str(), 960, 20, 24, PURPLE);
         }
-        else
+        else // This keeps the variable on the screen so we can read it.
         {
             std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
             DrawText(str.c_str(), 960, 20, 24, PURPLE);
         }
 
-        if (IsKeyPressed(KEY_A))
+    if (IsKeyPressed(KEY_A))
         {
             player->jumpSpeed -= 5;
             std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
             DrawText(str.c_str(), 960, 45, 24, PURPLE);
-        }else if (IsKeyPressed(KEY_S))
+        }
+        else if (IsKeyPressed(KEY_S))
         {
             player->jumpSpeed += 5;
             std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
@@ -382,12 +315,13 @@ void debugPlayerPhysics(entity* player){
             DrawText(str.c_str(), 960, 45, 24, PURPLE);
         }
         
-        if (IsKeyPressed(KEY_Z))
+    if (IsKeyPressed(KEY_Z))
         {
             player->gravity -= 5;
             std::string str = {"player-gravity: " + std::to_string(player->gravity)};
             DrawText(str.c_str(), 960, 70, 24, PURPLE);
-        }else if (IsKeyPressed(KEY_X))
+        }
+        else if (IsKeyPressed(KEY_X))
         {
             player->gravity += 5;
             std::string str = {"player-gravity: " + std::to_string(player->gravity)};
