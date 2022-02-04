@@ -21,7 +21,8 @@ public:
     // EnvItems Pipes[1];
     EnvItem pipeItem[4];
     float deltaT = GetFrameTime();
-    float pipeWidth = 120, pipeHeight = 245, topPipeWidth = 160, movementSpeed = -2.0f;
+    float pipeWidth = 120, pipeHeight = 245, topPipeWidth = 160, movementSpeed = -2.0f, FullPipeHeight = 500, spaceBetween = 250;
+    float plusY = -100;
 
     pipe(float x, float y);
     ~pipe();

@@ -102,19 +102,28 @@ void makeWindow(){
 
         if(IsKeyDown(KEY_KP_1)){
             DrawText("Key 1 is down", 10, 70, 28, PURPLE);
+
             testAnim.isAnimActive = true;
             playAnimLineRe(testAnim, 0, 16);
+
+            std::string PipeYOffsetStr = {"pipes.plusY: " + std::to_string(pipes.plusY)};
+            DrawText(PipeYOffsetStr.c_str(), 100, 100, 24, RED);
+            pipes.plusY -= 5;
         }
         else if (IsKeyDown(KEY_KP_2)){
             DrawText("Key 2 is down", 10, 70, 28, PURPLE);
             testAnim.isAnimActive = true;
             playAnimLineRe(testAnim, 1, 16);
+
+            std::string PipeYOffsetStr = {"pipes.plusY: " + std::to_string(pipes.plusY)};
+            DrawText(PipeYOffsetStr.c_str(), 100, 100, 24, RED);
+            pipes.plusY += 5;
         }
         else if (testAnim.isAnimActive == false && (testAnim.frameCounter != 0 || testAnim.currentFrame != 0)){testAnim.frameCounter = 0; testAnim.currentFrame = 0;/*testAnim.frameRect.x = 0; testAnim.frameRect.y = 0;*/}
-        else {DrawText("None of the TestKeys are down", 10, 70, 28, PURPLE); testAnim.isAnimActive = false; testAnim.frameRect.x = 0; testAnim.frameRect.y = 0;}        
+        else {DrawText("None of the TestKeys are down", 10, 70, 28, PURPLE); testAnim.isAnimActive = false; testAnim.frameRect.x = 0; testAnim.frameRect.y = 0; std::string PipeYOffsetStr = {"pipes.plusY: " + std::to_string(pipes.plusY)}; DrawText(PipeYOffsetStr.c_str(), 100, 100, 24, RED);}        
 
         ClearBackground((Color){12, 109, 199, 255});
-        DrawText("Hey from window", 100, 100, 24, RED);
+        
 
         //Rectangle rec1 = {0, 0, 32, 32};
         //Rectangle platform = {20, 520, 420, 6};
