@@ -8,23 +8,25 @@
 #include "entity.h"
 #include "pipe.h"
 
-#define GRAVITY 400
-#define PLAYER_JMP_SPD 250.0f
-#define PLAYER_HOR_SPD 275.0f
-
-/*typedef struct EnvItem {
-    Rectangle rect;
-    int blocking;
-    Color color;
-    } EnvItem;*/
-
+// Starts the game loop and initializes the window
 void makeWindow();
-// void playAnim(int& frameCounter, int& currentFrame, int& currentLine, int& animPrLine, int& animLines, bool& activeactive, Rectangle& frameRec, float& textureWidth, float& textureHeight);
-//void playAnimLine(int& frameCounter, int& currentFrame, int lineNumb, int animFramesPrLine, bool& active, Rectangle& frameRec, float& textureWidth, float& textureHeight);
+
+// Plays a animation line
 void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine);
+
+// Plays the death animation
 void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine);
 
+// Updates the player collision box, position and handles the player movement
 void updatePlayer(entity* player, float deltaTime);
+
+// Updates the player collision box, position and handles the player movement
 void updatePlayerCollision(entity* player, EnvItem* enviromentItems, int envItemsLength);
+
+// Resets the player variables
 void resetPlayer(entity* player);
+
+// Used to debug the player variables
+// It displays the variables and I'm able to edit them with a button press
+// Whats being read/edited can be found in the string variable
 void debugPlayerPhysics(entity* player);

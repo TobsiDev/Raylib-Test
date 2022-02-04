@@ -1,8 +1,10 @@
 // TODO:
-    // SOMETIMES THE PLAY DEATH ANIMATION IS GETTING CALLED 2 TIMES ( I THINK ). 
+    // SOMETIMES THE PLAY DEATH ANIMATION IS GETTING CALLED 2 TIMES ( I THINK ). EDIT: It might be because of the pipes being moved back to their starting position.
     // THIS RESULTS IN THE ANIMATION BEING PLAYED RIGHT AFTER THE PLAYER PRESSES THE RESET BUTTON
 
 #include "window.h"
+
+// Starts the game loop and initializes the window
 void makeWindow(){
 
     // sets the window size and text.

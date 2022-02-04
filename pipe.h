@@ -1,10 +1,6 @@
 #include <raylib.h>
 #include <iostream>
 
-// typedef struct EnvItems {
-//     EnvItem pipe*;
-// } EnvItems;
-
 typedef struct EnvItem {
     Rectangle rect;
     int blocking;
