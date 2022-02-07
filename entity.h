@@ -22,7 +22,7 @@ public:
     int frameCounter = 0;
     bool isAnimActive = false;
 
-    // Gravity stuff
+    // Gravity/movement stuff
     float speed;
     float hSpeed;
     float jumpSpeed;
@@ -35,5 +35,4 @@ public:
     ~entity();
 
     void debugLog();
-    void updatePlayerPhysics();
 };
