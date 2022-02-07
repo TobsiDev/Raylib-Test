@@ -1,32 +1,32 @@
 #include "entity.h"
 
-// This doesn't work for some reason. The Hitbox works, the image is loaded. But I need to test if there is anything being loaded at all. Don't think there is.
-// Try and get the Image before everything. So all "I" have to do is load the image beforehand and point to the image.
+// (Constructor) Initializes and sets the entity variables
 entity::entity(std::string fileLocal, int AnimationFramesPrLine, int AnimationFrameLines, int FrameHeight, int FrameWidth)
 {
-    width = FrameWidth;
-    height = FrameHeight;
-    image = LoadImage(fileLocal.c_str());
-    tex = LoadTextureFromImage(image); // Frames = 4x4 (4 frames on each axis)
-    position = {0.0f, 0.0f};
-    physicsPosition = {0.0f, 0.0f};
-    frameRect = {0, 0, width, height};
-    hitbox = {position.x, position.y, width, height};
-    //physicsBody = CreatePhysicsBodyRectangle(physicsPosition, width, height, 10);
-    animFramesPrLine = AnimationFramesPrLine;
-    animFrameLines = AnimationFrameLines;
-    currentFrame = 0;
-    currentLine = 0;
-    frameCounter = 0;
-    bool isAnimActive = false;
+    width = FrameWidth; // The width of a frame
+    height = FrameHeight; // The height of a frame
+    image = LoadImage(fileLocal.c_str()); // Loads the image
+    tex = LoadTextureFromImage(image); // Loads the texture
+    position = {0.0f, 0.0f}; // Entity position
+    // physicsPosition = {0.0f, 0.0f}; // 
+    frameRect = {0, 0, width, height}; // The frame rectangle (This is used to display the texture)
+    hitbox = {position.x, position.y, width, height}; // This rectangle is used as a hitbox
+    animFramesPrLine = AnimationFramesPrLine; // How many frames of animation there are pr line (Think of this as the Y axis) 
+    animFrameLines = AnimationFrameLines; // How many lines of animation there are (Think of this as the X axis)
+    currentFrame = 0; // We're on frame 0
+    currentLine = 0; // We're on line 0
+    frameCounter = 0; // The frame counter is only used when the animation is running
+    bool isAnimActive = false; // Is used to find out when to play the animation
 }
 
+// (Destructor) Unloads everything the entity uses
 entity::~entity()
 {
     UnloadImage(image);
-    //DestroyPhysicsBody(physicsBody);
+    UnloadTexture(tex);
 }
 
+// A debugging function
 void entity::debugLog(){
     std::cout << "Image: " << image.data << std::endl; 
     std::cout << "Texture2D: " << tex.format << std::endl; 
@@ -36,6 +36,4 @@ void entity::debugLog(){
     std::cout << "Width: " << width << std::endl; 
     std::cout << "Height: " << height << std::endl; 
     std::cout << "animFramesPrLine ; animFrameLines: " << animFramesPrLine << " ; " << animFrameLines << std::endl; 
-    
-    //std::cout << "What: " << a << std::endl;
 }
