@@ -16,7 +16,7 @@ void makeWindow(){
     SetWindowIcon(icon);
     
     // Player texture 
-    entity player("./res/img/player/SussyFlap-0001.png", 1, 16, 16, 16);
+    entity player("./res/img/player/SussyFlap-0001T.png", 1, 16, 16, 16);
     // Init player position and variables
     player.position = (Vector2){100, 200};
     player.speed = 0;
@@ -78,7 +78,8 @@ void makeWindow(){
         // Checks if the player is alive and plays the death animation if the player is dead
         if (player.isAlive == false)
         {
-            playDeathAnim(player, 0, 11);
+            playDeathAnimNPatch(player, 0, 11);
+            // playDeathAnim(player, 0, 11);
         }
         
         // Reset key
@@ -129,7 +130,11 @@ void makeWindow(){
         DrawRectangleRec(deathFloor.rect, deathFloor.color);
 
         // Draws the player, test animation and the player hitbox
-        DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
+        //              DrawTextureEx(player.tex, (Vector2){player.frameRect.x, player.frameRect.y}, 0.0f, 1.0f, WHITE);
+
+        DrawTextureNPatch(player.tex, (NPatchInfo){(Rectangle){player.frameRect.x, player.frameRect.y, 16.0f, 16.0f}, 0, 0, 0, 0, NPATCH_NINE_PATCH}, (Rectangle) {player.position.x, player.position.y, 32.0f, 32.0f}, (Vector2){0, 0}, 0.0f, WHITE);
+        // DrawTexture(player.tex, player.position.x, player.position.y, WHITE);
+        //DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
         DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
         DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, RED);
         
@@ -176,6 +181,38 @@ void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
     inst.frameRect.y = inst.currentFrame*inst.height; 
 }
 
+// Plays the death animation for NPatched textures
+void playDeathAnimNPatch(entity& inst, int lineNumb, int animFramesPrLine){
+    ///             DEBUGS THE ANIMATION                ///
+    std::cout << "==========================================" << std::endl;
+    std::cout << "lineNumb: " << lineNumb << std::endl;
+    std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
+    std::cout << "currentFrame: " << inst.currentFrame << std::endl;
+    std::cout << "frameCounter: " << inst.frameCounter << std::endl;
+    std::cout << "\ninst.frameRect.x: " << inst.frameRect.x << std::endl;
+    std::cout << "inst.frameRect.y: " << inst.frameRect.y << std::endl;
+    ///             DEBUGS THE ANIMATION                ///
+
+    if (inst.deathAnimFinished != true && inst.currentFrame < animFramesPrLine)
+    {
+        inst.frameCounter++;
+        if (inst.frameCounter > 4 && inst.deathAnimFinished != true)
+        {
+            inst.currentFrame++;
+            if (inst.currentFrame > animFramesPrLine)
+            {
+                inst.currentFrame = 0;
+                inst.deathAnimFinished = true;
+            }
+            inst.frameCounter = 0;
+        }
+    }
+    
+
+    inst.frameRect.x = lineNumb*inst.width;
+    inst.frameRect.y = inst.currentFrame*inst.height;
+}
+
 // Plays the death animation
 void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
 
@@ -205,7 +242,9 @@ void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
 
     // Sets the position on the texture (If the next frame is 16px to the right, it will move 16px to the right)
     inst.frameRect.x = lineNumb*inst.width;
-    inst.frameRect.y = inst.currentFrame*inst.height; 
+    inst.frameRect.y = inst.currentFrame*inst.height;
+    std::cout << "inst.frameRect.x: " << inst.frameRect.x << std::endl;
+    std::cout << "inst.frameRect.y: " << inst.frameRect.y << std::endl;
 }
 
 // Updates the player collision box, position and handles the player movement
@@ -273,8 +312,8 @@ void resetPlayer(entity* player){
             player->currentLine = 0;
             player->frameCounter = 0;
             player->deathAnimFinished = false;
-            player->frameRect.x = player->width;
-            player->frameRect.y = player->height;
+            player->frameRect.x = 0;
+            player->frameRect.y = 0;
 }
 
 // Used to debug the player variables

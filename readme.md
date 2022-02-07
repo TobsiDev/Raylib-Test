@@ -4,6 +4,7 @@
 - [X] Pipe collision
   - [X] Bottom = death
 - [X] Play player death animation when touching the pipes
+- [ ] Make the player texture bigger with 
 - [ ] Camera follow player (Or just move the pipes) 
 
         ```c++

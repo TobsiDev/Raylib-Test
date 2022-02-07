@@ -17,6 +17,7 @@ public:
     Vector2 physicsPosition = {0.0f, 0.0f};
     Rectangle frameRect = {0, 0, width, height};
     Rectangle hitbox = {position.x, position.y, width, height};
+    //NPatchInfo ninePatchInfo = {};  
 
     // Animation stuff
     float width, height;
