@@ -16,11 +16,11 @@ public:
     Vector2 position = {0.0f, 0.0f};
     Vector2 physicsPosition = {0.0f, 0.0f};
     Rectangle frameRect = {0, 0, width, height};
-    Rectangle hitbox = {position.x, position.y, width, height};
+    Rectangle hitbox = {position.x, position.y, sizeX, sizeY};
     //NPatchInfo ninePatchInfo = {};  
 
     // Animation stuff
-    float width, height;
+    float width, height, sizeX, sizeY;
     int animFramesPrLine, animFrameLines;
     int currentFrame = 0;
     int currentLine = 0;
@@ -35,6 +35,9 @@ public:
     bool canJump;
     bool isAlive;
     bool deathAnimFinished;
+
+    // Debugging stuff
+    bool showHitbox = false;
 
     entity(std::string fileLocal, int AnimationFramesPrLine, int AnimationFrameLines, int FrameHeight, int FrameWidth);
     ~entity();

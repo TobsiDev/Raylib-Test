@@ -7,6 +7,8 @@
 // Starts the game loop and initializes the window
 void makeWindow(){
 
+    showDebugging = false;
+
     // sets the window size and text.
     InitWindow(1280, 720, "Tobsi's Raylib Project");
     SetTargetFPS(60); // Sets the targeted FPS (The FPS we're going for)
@@ -17,15 +19,21 @@ void makeWindow(){
     
     // Player texture 
     entity player("./res/img/player/SussyFlap-0001T.png", 1, 16, 16, 16);
+
     // Init player position and variables
     player.position = (Vector2){100, 200};
+    player.sizeX = 84; // Player sprite width size is being set // a size 4 looks nice. but it's not visible.
+    player.sizeY = 84; // Player sprite height size is being set
+    player.hitbox.width = player.sizeX; // Makes the hitbox and sprite width fit
+    player.hitbox.height = player.sizeY; // Makes the hitbox and sprite height fit
     player.speed = 0;
     player.hSpeed = 330.0f;
-    player.jumpSpeed = 395.0f; // 150.0f
-    player.gravity = 850; // 270 or 170
+    player.jumpSpeed = 395.0f;
+    player.gravity = 850;
     player.isAlive = true;
     player.canJump = true;
     player.deathAnimFinished = false;
+    player.showHitbox = false;
 
     // Test Pipes
     float pipeWidth = 120, pipeHeight = 245, pipeXPosition = 400;
@@ -44,9 +52,13 @@ void makeWindow(){
     // Test animation
     entity testAnim("./res/img/player/Test_anim-0003.png", 1, 16, 16, 16);
 
+    score playerScore;
+
     // Main game loop
     while (!WindowShouldClose())
     {
+        playerScore.updateScore();
+
         // Delta
         float deltaT = GetFrameTime();
 
@@ -78,8 +90,7 @@ void makeWindow(){
         // Checks if the player is alive and plays the death animation if the player is dead
         if (player.isAlive == false)
         {
-            playDeathAnimNPatch(player, 0, 11);
-            // playDeathAnim(player, 0, 11);
+            playDeathAnim(player, 0, 11);
         }
         
         // Reset key
@@ -130,13 +141,15 @@ void makeWindow(){
         DrawRectangleRec(deathFloor.rect, deathFloor.color);
 
         // Draws the player, test animation and the player hitbox
-        //              DrawTextureEx(player.tex, (Vector2){player.frameRect.x, player.frameRect.y}, 0.0f, 1.0f, WHITE);
-
-        DrawTextureNPatch(player.tex, (NPatchInfo){(Rectangle){player.frameRect.x, player.frameRect.y, 16.0f, 16.0f}, 0, 0, 0, 0, NPATCH_NINE_PATCH}, (Rectangle) {player.position.x, player.position.y, 32.0f, 32.0f}, (Vector2){0, 0}, 0.0f, WHITE);
-        // DrawTexture(player.tex, player.position.x, player.position.y, WHITE);
+        DrawTextureNPatch(player.tex, 
+                            (NPatchInfo){(Rectangle){player.frameRect.x, player.frameRect.y, 16.0f, 16.0f}, 0, 0, 0, 0, NPATCH_NINE_PATCH}, // NPatchInfo (NPatchInfo){(Rectangle){SpriteXPosition, SpriteYPosition, SizeX, SizeY}, leftBorderOffset, topBorderOffset, rightBorderOffset, bottomBorderOffset, LayoutOfTheN-patch)
+                            (Rectangle) {player.position.x, player.position.y, player.sizeX, player.sizeY}, // PositionX, PositionY, SizeX, SizeY
+                            (Vector2){0, 0}, 
+                            0.0f, 
+                            WHITE);
         //DrawTextureRec(player.tex, player.frameRect, player.position, WHITE);
         DrawTextureRec(testAnim.tex, testAnim.frameRect, testAnim.position, WHITE);
-        DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, RED);
+        // DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, RED);
         
         // Shows the FPS
         DrawFPS(10, 10);
@@ -181,38 +194,6 @@ void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine){
     inst.frameRect.y = inst.currentFrame*inst.height; 
 }
 
-// Plays the death animation for NPatched textures
-void playDeathAnimNPatch(entity& inst, int lineNumb, int animFramesPrLine){
-    ///             DEBUGS THE ANIMATION                ///
-    std::cout << "==========================================" << std::endl;
-    std::cout << "lineNumb: " << lineNumb << std::endl;
-    std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
-    std::cout << "currentFrame: " << inst.currentFrame << std::endl;
-    std::cout << "frameCounter: " << inst.frameCounter << std::endl;
-    std::cout << "\ninst.frameRect.x: " << inst.frameRect.x << std::endl;
-    std::cout << "inst.frameRect.y: " << inst.frameRect.y << std::endl;
-    ///             DEBUGS THE ANIMATION                ///
-
-    if (inst.deathAnimFinished != true && inst.currentFrame < animFramesPrLine)
-    {
-        inst.frameCounter++;
-        if (inst.frameCounter > 4 && inst.deathAnimFinished != true)
-        {
-            inst.currentFrame++;
-            if (inst.currentFrame > animFramesPrLine)
-            {
-                inst.currentFrame = 0;
-                inst.deathAnimFinished = true;
-            }
-            inst.frameCounter = 0;
-        }
-    }
-    
-
-    inst.frameRect.x = lineNumb*inst.width;
-    inst.frameRect.y = inst.currentFrame*inst.height;
-}
-
 // Plays the death animation
 void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
 
@@ -222,6 +203,8 @@ void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
     std::cout << "animFramesPrLine: " << animFramesPrLine << std::endl;
     std::cout << "currentFrame: " << inst.currentFrame << std::endl;
     std::cout << "frameCounter: " << inst.frameCounter << std::endl;
+    std::cout << "\ninst.frameRect.x: " << inst.frameRect.x << std::endl;
+    std::cout << "inst.frameRect.y: " << inst.frameRect.y << std::endl;
     ///             DEBUGS THE ANIMATION                ///
 
     // plays the animation
@@ -243,8 +226,6 @@ void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine){
     // Sets the position on the texture (If the next frame is 16px to the right, it will move 16px to the right)
     inst.frameRect.x = lineNumb*inst.width;
     inst.frameRect.y = inst.currentFrame*inst.height;
-    std::cout << "inst.frameRect.x: " << inst.frameRect.x << std::endl;
-    std::cout << "inst.frameRect.y: " << inst.frameRect.y << std::endl;
 }
 
 // Updates the player collision box, position and handles the player movement
@@ -320,64 +301,125 @@ void resetPlayer(entity* player){
 // It displays the variables and I'm able to edit them with a button press
 // Whats being read/edited can be found in the string variable
 void debugPlayerPhysics(entity* player){
-    if (IsKeyPressed(KEY_Q)) // Key being used ( This will be on the left of the other key and decrease the value of the variable )
+    if(IsKeyPressed(KEY_KP_9)) // Toggle for showing the hitbox
         {
-            player->hSpeed -= 5; // What and how much the variables is being changed
-            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)}; // The string is being used to write it to the screen
-            DrawText(str.c_str(), 960, 20, 24, PURPLE); // Writes the string to the screen in purple
+            if (showDebugging == true)
+            {
+                showDebugging = false;
+            }
+            else
+            {
+                showDebugging = true;
+            }
         }
-        else if (IsKeyPressed(KEY_W)) // The other key being used. This key is right next to the first key and increses the variable
-        {
-            player->hSpeed += 5;
-            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
-            DrawText(str.c_str(), 960, 20, 24, PURPLE);
-        }
-        else // This keeps the variable on the screen so we can read it.
-        {
-            std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
-            DrawText(str.c_str(), 960, 20, 24, PURPLE);
-        }
+    
+    if (showDebugging == true)
+    {
+        if (IsKeyPressed(KEY_Q)) // Key being used ( This will be on the left of the other key and decrease the value of the variable )
+            {
+                player->hSpeed -= 5; // What and how much the variables is being changed
+                std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)}; // The string is being used to write it to the screen
+                DrawText(str.c_str(), 960, 20, 24, PURPLE); // Writes the string to the screen in purple
+            }
+            else if (IsKeyPressed(KEY_W)) // The other key being used. This key is right next to the first key and increses the variable
+            {
+                player->hSpeed += 5;
+                std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
+                DrawText(str.c_str(), 960, 20, 24, PURPLE);
+            }
+            else // This keeps the variable on the screen so we can read it.
+            {
+                std::string str = {"player-hSpeed: " + std::to_string(player->hSpeed)};
+                DrawText(str.c_str(), 960, 20, 24, PURPLE);
+            }
 
-    if (IsKeyPressed(KEY_A))
-        {
-            player->jumpSpeed -= 5;
-            std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
-            DrawText(str.c_str(), 960, 45, 24, PURPLE);
-        }
-        else if (IsKeyPressed(KEY_S))
-        {
-            player->jumpSpeed += 5;
-            std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
-            DrawText(str.c_str(), 960, 45, 24, PURPLE);
-        }
-        else
-        {
-            std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
-            DrawText(str.c_str(), 960, 45, 24, PURPLE);
-        }
-        
-    if (IsKeyPressed(KEY_Z))
-        {
-            player->gravity -= 5;
-            std::string str = {"player-gravity: " + std::to_string(player->gravity)};
-            DrawText(str.c_str(), 960, 70, 24, PURPLE);
-        }
-        else if (IsKeyPressed(KEY_X))
-        {
-            player->gravity += 5;
-            std::string str = {"player-gravity: " + std::to_string(player->gravity)};
-            DrawText(str.c_str(), 960, 70, 24, PURPLE);
-        }
-        else
-        {
-            std::string str = {"player-gravity: " + std::to_string(player->gravity)};
-            DrawText(str.c_str(), 960, 70, 24, PURPLE);
-        }
+        if (IsKeyPressed(KEY_A))
+            {
+                player->jumpSpeed -= 5;
+                std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
+                DrawText(str.c_str(), 960, 45, 24, PURPLE);
+            }
+            else if (IsKeyPressed(KEY_S))
+            {
+                player->jumpSpeed += 5;
+                std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
+                DrawText(str.c_str(), 960, 45, 24, PURPLE);
+            }
+            else
+            {
+                std::string str = {"player-jumpSpeed: " + std::to_string(player->jumpSpeed)};
+                DrawText(str.c_str(), 960, 45, 24, PURPLE);
+            }
+            
+        if (IsKeyPressed(KEY_Z))
+            {
+                player->gravity -= 5;
+                std::string str = {"player-gravity: " + std::to_string(player->gravity)};
+                DrawText(str.c_str(), 960, 70, 24, PURPLE);
+            }
+            else if (IsKeyPressed(KEY_X))
+            {
+                player->gravity += 5;
+                std::string str = {"player-gravity: " + std::to_string(player->gravity)};
+                DrawText(str.c_str(), 960, 70, 24, PURPLE);
+            }
+            else
+            {
+                std::string str = {"player-gravity: " + std::to_string(player->gravity)};
+                DrawText(str.c_str(), 960, 70, 24, PURPLE);
+            }
 
-        std::string canJump = {"player canJump: " + std::to_string(player->canJump)};
-        DrawText(canJump.c_str(), 960, 95, 24, PURPLE);
+        if (IsKeyDown(KEY_KP_4))
+            {
+                player->hitbox.width = player->sizeX -= 1;
+                player->hitbox.height = player->sizeY -= 1;
+                std::string str = {"player.sizeX: " + std::to_string(player->sizeX)};
+                DrawText(str.c_str(), 960, 145, 24, PURPLE);
 
-        std::string alive = {"player alive: " + std::to_string(player->isAlive)};
-        DrawText(alive.c_str(), 960, 120, 24, PURPLE);
+                std::string str2 = {"player.sizeY: " + std::to_string(player->sizeY)};
+                DrawText(str2.c_str(), 960, 170, 24, PURPLE);
+            }
+            else if (IsKeyDown(KEY_KP_5))
+            {
+                player->hitbox.width = player->sizeX += 1;
+                player->hitbox.height = player->sizeY += 1;
+                std::string str = {"player.sizeX: " + std::to_string(player->sizeX)};
+                DrawText(str.c_str(), 960, 145, 24, PURPLE);
 
+                std::string str2 = {"player.sizeY: " + std::to_string(player->sizeY)};
+                DrawText(str2.c_str(), 960, 170, 24, PURPLE);
+            }
+            else
+            {
+                std::string str = {"player.sizeX: " + std::to_string(player->sizeX)};
+                DrawText(str.c_str(), 960, 145, 24, PURPLE);
+
+                std::string str2 = {"player.sizeY: " + std::to_string(player->sizeY)};
+                DrawText(str2.c_str(), 960, 170, 24, PURPLE);
+            }
+
+            if(IsKeyPressed(KEY_KP_6)) // Toggle for showing the hitbox
+            {
+                if (player->showHitbox == true)
+                {
+                    player->showHitbox = false;
+                }
+                else
+                {
+                    player->showHitbox = true;
+                }
+            }
+
+            if (player->showHitbox == true)
+            {
+                DrawRectangleLines(player->hitbox.x, player->hitbox.y, player->hitbox.width, player->hitbox.height, RED);
+            }
+            
+
+            std::string canJump = {"player canJump: " + std::to_string(player->canJump)};
+            DrawText(canJump.c_str(), 960, 95, 24, PURPLE);
+
+            std::string alive = {"player alive: " + std::to_string(player->isAlive)};
+            DrawText(alive.c_str(), 960, 120, 24, PURPLE);
+    }
 }

@@ -7,15 +7,15 @@
 
 #include "entity.h"
 #include "pipe.h"
+#include "score.h"
+
+bool showDebugging = false;
 
 // Starts the game loop and initializes the window
 void makeWindow();
 
 // Plays a animation line
 void playAnimLineRe(entity& inst, int lineNumb, int animFramesPrLine);
-
-// Plays the death animation for NPatched textures
-void playDeathAnimNPatch(entity& inst, int lineNumb, int animFramesPrLine);
 
 // Plays the death animation
 void playDeathAnim(entity& inst, int lineNumb, int animFramesPrLine);
